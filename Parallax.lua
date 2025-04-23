@@ -1,31 +1,46 @@
--- Options:
-local maxLookUp = 5
-local maxLookSide = 5
-local cameraPos = Vector3.new(0, 10, 0)
-local lookAtPos = Vector3.new(10, 8, 5)
-local FOV = 55
+--===== CONFIGURATION =====--
+local Config = {
+    CameraPosition    = Vector3.new(10, 100, 0), -- The position of the camera
+    LookAtPosition    = Vector3.new(0, 100, 0), -- The position the camera will face
+    FieldOfView       = 65, -- Camera FOV
+    MaxSideOffset     = 5, -- Max Horizontal offset of the camera in studs
+    MaxVerticalOffset = 5, -- Max Vertical offset of the camera in studs
+}
 
--- Variables
-local player = game.Players.LocalPlayer
-local camera = game.Workspace.CurrentCamera
-camera.CameraType = Enum.CameraType.Scriptable
+--===== SETUP =====--
+local Players    = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-local cameraCFrame = CFrame.new(cameraPos, lookAtPos)
-camera.CFrame = cameraCFrame
-camera.FieldOfView = FOV
-local mouse = player:GetMouse()
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+camera.CameraType   = Enum.CameraType.Scriptable
+camera.FieldOfView  = Config.FieldOfView
 
--- Parallax Effect
-game:GetService("RunService").RenderStepped:Connect(function()
-	local mouseX = (mouse.X - (workspace.CurrentCamera.ViewportSize.X / 2)) / workspace.CurrentCamera.ViewportSize.X
-	local mouseY = (mouse.Y - (workspace.CurrentCamera.ViewportSize.Y / 2)) / workspace.CurrentCamera.ViewportSize.Y
-	mouseX = -mouseX
+local baseCFrame   = CFrame.new(Config.CameraPosition, Config.LookAtPosition)
+local rightVector  = baseCFrame.RightVector
+local upVector     = baseCFrame.UpVector
 
-	local lookX = math.clamp(mouseX * maxLookSide, -maxLookSide, maxLookSide)
-	local lookY = math.clamp(mouseY * maxLookUp, -maxLookUp, maxLookUp)
+camera.CFrame = baseCFrame
+local mouse      = player:GetMouse()
 
-	local newLookAtPos = lookAtPos + Vector3.new(lookX, -lookY, 0)
-	local newCameraCFrame = CFrame.new(cameraPos, newLookAtPos)
+--===== RENDER LOOP =====--
+RunService.RenderStepped:Connect(function()
+    local vw, vh = camera.ViewportSize.X, camera.ViewportSize.Y
 
-	camera.CFrame = newCameraCFrame
+    local normX = (mouse.X / vw) - 0.5
+    local normY = (mouse.Y / vh) - 0.5
+
+    local offsetX = math.clamp(-normX * Config.MaxSideOffset,
+                               -Config.MaxSideOffset, Config.MaxSideOffset)
+    local offsetY = math.clamp( normY * Config.MaxVerticalOffset,
+                               -Config.MaxVerticalOffset, Config.MaxVerticalOffset)
+
+    local horizontalOffset = rightVector * offsetX
+    local verticalOffset   = upVector    * offsetY
+
+    local adjustedLookAt = Config.LookAtPosition
+                           + horizontalOffset
+                           + verticalOffset
+
+    camera.CFrame = CFrame.new(Config.CameraPosition, adjustedLookAt)
 end)
