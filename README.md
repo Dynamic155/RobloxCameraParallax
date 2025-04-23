@@ -1,78 +1,108 @@
-# Roblox Camera Parallax Effect
+## Roblox Parallax Camera Module
 
-This script creates a parallax effect for 3D GUI elements in Roblox by adjusting the camera's position based on the player's mouse movements. 
+A reusable, beginner-friendly module that adds a smooth, mouse-driven parallax look-around effect to your Roblox camera. Tweak a few values in one place and drop it into your project!
 
-## How It Works
+---
 
-The script uses the `RenderStepped` event to continuously update the camera's position and create a parallax effect. As the player moves their mouse, the camera subtly shifts its viewpoint, making GUI elements appear more dynamic and three-dimensional.
+## 🚀 Features
 
-## Script Overview
+- **Easy Configuration**  
+  All key settings (camera position, look-at target, FOV, max offsets) live in one `Config` table.
 
-Here's a breakdown of the script and its components:
+- **True Horizontal Parallax**  
+  Uses the camera’s `RightVector` and `UpVector` for accurate side-to-side and vertical shifts.
 
-### Options
+- **Lightweight & Performant**  
+  Precomputes basis vectors once; only minimal math each frame.
 
-- `maxLookUp`: The maximum vertical angle the camera can look up. 
-- `maxLookSide`: The maximum horizontal angle the camera can look to the sides.
-- `cameraPos`: The initial position of the camera in the 3D space.
-- `lookAtPos`: The initial position the camera is looking at.
-- `FOV`: The Field of View of the camera.
+- **Self-Documenting**  
+  Clear section headers and inline comments make it simple to understand and extend.
 
-### Variables
+---
 
-- `player`: The local player using the camera.
-- `camera`: The current camera in the workspace.
-- `cameraCFrame`: The initial CFrame (position and orientation) of the camera.
-- `mouse`: The local player's mouse.
+## 📥 Installation
 
-### Parallax Effect
+1. **Copy** the `ParallaxCamera.lua` module into your project (e.g. under `StarterPlayerScripts`).
+2. **Require** and **initialize** in a LocalScript:
 
-The parallax effect is created by recalculating the camera's `CFrame` on each frame based on the player's mouse position. The new camera position is calculated to simulate a depth effect.
+   ```lua
+   -- In StarterPlayerScripts/CameraController.script
+   local ParallaxCamera = require(script:WaitForChild("ParallaxCamera"))
+   ParallaxCamera:Start({
+       CameraPosition    = Vector3.new(20, 100, 0),
+       LookAtPosition    = Vector3.new(0, 100, 0),
+       FieldOfView       = 65,
+       MaxSideOffset     = 55,
+       MaxVerticalOffset = 5,
+   })
+   ```
 
-## Options
+---
 
-- **`maxLookUp`**: Adjusts the maximum angle the camera can tilt upwards. Increase or decrease this value to control the vertical movement sensitivity.
-  
-  ```lua
-  local maxLookUp = 5
-  ```
+## ⚙️ Configuration
 
-- **`maxLookSide`**: Adjusts the maximum angle the camera can tilt to the sides. Increase or decrease this value to control the horizontal movement sensitivity.
-  
-  ```lua
-  local maxLookSide = 5
-  ```
-
-- **`cameraPos`**: Sets the initial position of the camera. Change the `Vector3` values to place the camera at a different starting position.
-  
-  ```lua
-  local cameraPos = Vector3.new(0, 10, 0)
-  ```
-
-- **`lookAtPos`**: Sets the initial point the camera looks at. Change the `Vector3` values to alter where the camera is initially focused.
-  
-  ```lua
-  local lookAtPos = Vector3.new(10, 8, 5)
-  ```
-
-- **`FOV`**: Sets the Field of View of the camera. Modify this value to change how wide or narrow the camera's view is.
-  
-  ```lua
-  local FOV = 55
-  ```
-
-## Customization
-
-To customize the effect, adjust the values of the options at the beginning of the script. For instance, increasing `maxLookUp` and `maxLookSide` will make the camera more responsive to mouse movements, enhancing the parallax effect.
+All configurable values live in a single table:
 
 ```lua
-local maxLookUp = 10
-local maxLookSide = 10
+local Config = {
+    -- Camera placement in world space
+    CameraPosition    = Vector3.new(0, 10, 0),
+    -- The point the camera always looks toward
+    LookAtPosition    = Vector3.new(10, 8, 5),
+    -- Field of view (degrees)
+    FieldOfView       = 55,
+
+    -- Max horizontal shift (studs)
+    MaxSideOffset     = 5,
+    -- Max vertical shift (studs)
+    MaxVerticalOffset = 5,
+}
 ```
 
-You can also change the initial camera position and the point it looks at to better fit your scene.
+- **CameraPosition**: Change to move your camera’s origin.  
+- **LookAtPosition**: Change where the camera aims at rest.  
+- **FieldOfView**: Wider FOV feels more dynamic; narrower is more focused.  
+- **MaxSideOffset / MaxVerticalOffset**: Increase for bolder movement; decrease for subtler effect.
+
+---
+
+## 🎮 Usage Example
 
 ```lua
-local cameraPos = Vector3.new(5, 15, 5)
-local lookAtPos = Vector3.new(15, 10, 10)
+local Players        = game:GetService("Players")
+local RunService     = game:GetService("RunService")
+
+-- Require the module
+local ParallaxCamera = require(path.to.ParallaxCamera)
+
+-- Start it with defaults or custom Config
+ParallaxCamera:Start({
+    CameraPosition    = Vector3.new(5, 15, 5),
+    LookAtPosition    = Vector3.new(15, 10, 10),
+    FieldOfView       = 70,
+    MaxSideOffset     = 10,
+    MaxVerticalOffset = 8,
+})
 ```
+
+1. Place the above in a **LocalScript** under **StarterPlayerScripts**.  
+2. Adjust the table values to taste.  
+3. Playtest to see your new parallax in action!
+
+---
+
+## 🛠️ Advanced Tips
+
+- **Smoothing**: Wrap the CFrame update in `CFrame:Lerp(currentCFrame, targetCFrame, alpha)` for eased motion.  
+- **Dynamic Targets**: Point the camera at a moving object by updating `LookAtPosition` each frame.  
+- **Toggle On/Off**: Add a boolean flag to enable or disable the effect at runtime.  
+
+---
+
+## 🤝 Contributing
+
+1. Fork this repo.  
+2. Create a feature branch (`git checkout -b feat/my-awesome-feature`).  
+3. Commit your changes (`git commit -m "Add awesome feature"`).  
+4. Push to the branch (`git push origin feat/my-awesome-feature`).  
+5. Open a Pull Request—we’ll review and merge!
